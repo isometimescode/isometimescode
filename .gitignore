@@ -1,13 +1,11 @@
 # Project dependencies
 .cache
+.astro
+dist/
 node_modules
-yarn-error.log
 
 # Build directory
-/public
 .DS_Store
-resources/_gen
-.hugo_build.lock
 
 # ENV
 .env.*

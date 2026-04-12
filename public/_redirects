@@ -1,0 +1,5 @@
+# Cloudflare Pages redirects
+# https://developers.cloudflare.com/pages/configuration/redirects/
+
+# Redirect bare domain to www (configure in Cloudflare DNS instead if preferred)
+# https://isometimescode.com/* https://www.isometimescode.com/:splat 301

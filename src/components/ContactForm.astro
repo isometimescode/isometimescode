@@ -1,0 +1,111 @@
+---
+// ContactForm.astro
+// Replace YOUR_ACCESS_KEY_HERE with your key from https://web3forms.com
+---
+
+<form id="contact-form" novalidate>
+  <input type="hidden" name="access_key" value="b950b3a6-6866-4340-9610-3d190fa56f41" />
+
+  {/* Honeypot spam prevention - invisible to real users */}
+  <input type="checkbox" name="botcheck" style="display:none" tabindex="-1" autocomplete="off" />
+
+  <div class="form-group">
+    <label for="name">Your name</label>
+    <input
+      type="text"
+      id="name"
+      name="name"
+      placeholder="Ellen Ripley"
+      required
+      autocomplete="name"
+    />
+  </div>
+
+  <div class="form-group">
+    <label for="email">Email address</label>
+    <input
+      type="email"
+      id="email"
+      name="email"
+      placeholder="ripley@weyland-yutani.com"
+      required
+      autocomplete="email"
+    />
+  </div>
+
+  <div class="form-group">
+    <label for="message">Message</label>
+    <textarea
+      id="message"
+      name="message"
+      placeholder="We have several thrilling new opportunities on-board the USCSS Nostromo..."
+      required
+    ></textarea>
+  </div>
+
+  <button type="submit" class="btn-submit" id="submit-btn">
+    <span id="btn-text">Send message</span>
+    <span id="btn-arrow" aria-hidden="true">→</span>
+  </button>
+
+  <div id="form-result" role="status" aria-live="polite"></div>
+</form>
+
+<script>
+  const form = document.getElementById('contact-form') as HTMLFormElement;
+  const result = document.getElementById('form-result')!;
+  const submitBtn = document.getElementById('submit-btn') as HTMLButtonElement;
+  const btnText = document.getElementById('btn-text')!;
+  const btnArrow = document.getElementById('btn-arrow')!;
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    // Basic client-side validation
+    if (!form.checkValidity()) {
+      form.reportValidity();
+      return;
+    }
+
+    // Loading state
+    submitBtn.disabled = true;
+    btnText.textContent = 'Sending…';
+    btnArrow.textContent = '';
+    result.className = '';
+    result.textContent = '';
+
+    const formData = new FormData(form);
+    const name = formData.get('name');
+    formData.append('subject', `New message from ${name}`);
+    const payload = JSON.stringify(Object.fromEntries(formData));
+
+    try {
+      const response = await fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: payload,
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        result.className = 'success';
+        result.textContent = '✓ Message sent — I\'ll be in touch soon.';
+        form.reset();
+      } else {
+        throw new Error(data.message || 'Submission failed');
+      }
+    } catch (err) {
+      result.className = 'error';
+      result.textContent = '✗ Something went wrong. Please try again.';
+      console.error('Form error:', err);
+    } finally {
+      submitBtn.disabled = false;
+      btnText.textContent = 'Send message';
+      btnArrow.textContent = '→';
+    }
+  });
+</script>
